@@ -57,7 +57,7 @@ public class Curve
     {
         setCurveColor(Color.BLACK);
         setMainTangentColor(Color.CRIMSON);
-        setBorderColor(Color.LIGHTGRAY);
+        setBorderColor(Color.GRAY);
     }
 
     private Point pointLeap(Point a, Point b, BigDecimal t)
@@ -122,13 +122,13 @@ public class Curve
     {
         if(showBorder)
         {
-            Point tmp = pointList.get(0);
+            Point tmp = pointList.getFirst();
             for(int i = 0; i < pointList.size(); i++)
             {
                 BasicPainter.drawLine(tmp, pointList.get(i), borderColor, gc);
                 tmp = pointList.get(i);
             }
-            BasicPainter.drawLine(tmp, pointList.get(0), borderColor, gc);
+            BasicPainter.drawLine(tmp, pointList.getFirst(), borderColor, gc);
         }
     }
 
