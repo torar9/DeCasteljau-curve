@@ -1,2 +1,2 @@
 # DeCasteljau-curve
-JavaFX application for drawing cubic curve with DeCasteljau algorithm.
+JavaFX application for drawing curve with DeCasteljau algorithm.

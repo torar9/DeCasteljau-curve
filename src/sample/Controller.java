@@ -14,18 +14,23 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable
 {
     private Timeline timer;
     private Curve curve;
-    private ActiveButtonMode buttonMode;
+    private Point temp;
+    private boolean clickMode;
     private boolean animation;
 
     @FXML
@@ -34,22 +39,6 @@ public class Controller implements Initializable
     private Label coordLabel;
     @FXML
     private Canvas canvas;
-    @FXML
-    private TextField axField;
-    @FXML
-    private TextField ayField;
-    @FXML
-    private TextField bxField;
-    @FXML
-    private TextField byField;
-    @FXML
-    private TextField cxField;
-    @FXML
-    private TextField cyField;
-    @FXML
-    private TextField dxField;
-    @FXML
-    private TextField dyField;
     @FXML
     private Slider paramTSlider;
     @FXML
@@ -68,9 +57,9 @@ public class Controller implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources)
     {
-        buttonMode = ActiveButtonMode.NONE;
         curve = new Curve();
         animation = false;
+        clickMode = false;
 
         timer = new Timeline(new KeyFrame(Duration.millis(50), new EventHandler<ActionEvent>()
         {
@@ -101,52 +90,31 @@ public class Controller implements Initializable
             }
         }));
         timer.setCycleCount(Timeline.INDEFINITE);
-
-        setTextFieldAsNumericOnly(axField);
-        setTextFieldAsNumericOnly(ayField);
-        setTextFieldAsNumericOnly(bxField);
-        setTextFieldAsNumericOnly(byField);
-        setTextFieldAsNumericOnly(cxField);
-        setTextFieldAsNumericOnly(cyField);
-        setTextFieldAsNumericOnly(dxField);
-        setTextFieldAsNumericOnly(dyField);
         updateParamDisplay();
+
+        setDefaultPoints();
+
         repaint();
+    }
+
+    private void setDefaultPoints()
+    {
+        curve.addPoint(new Point(100, 400));
+        curve.addPoint(new Point(100, 100));
+        curve.addPoint(new Point(700, 100));
+        curve.addPoint(new Point(700, 400));
     }
 
     @FXML
     private void handleMouseDragEvent(MouseEvent event)
     {
-        if(event.getX() <= canvas.getWidth() && event.getY() <= canvas.getHeight() && event.getX() >= 0 && event.getY() >= 0)
+        if(clickMode)
         {
-            switch(buttonMode)
+            if(event.getX() <= canvas.getWidth() && event.getY() <= canvas.getHeight() && event.getX() >= 0 && event.getY() >= 0)
             {
-                case NONE:
-                    break;
-                case PA_BUTTON:
-                    axField.setText(Integer.toString((int)event.getX()));
-                    ayField.setText(Integer.toString((int)event.getY()));
-                    curve.getPointA().setPoint((int)event.getX(), (int)event.getY());
-                    repaint();
-                    break;
-                case PB_BUTTON:
-                    bxField.setText(Integer.toString((int)event.getX()));
-                    byField.setText(Integer.toString((int)event.getY()));
-                    curve.getPointB().setPoint((int)event.getX(), (int)event.getY());
-                    repaint();
-                    break;
-                case PC_BUTTON:
-                    cxField.setText(Integer.toString((int)event.getX()));
-                    cyField.setText(Integer.toString((int)event.getY()));
-                    curve.getPointC().setPoint((int)event.getX(), (int)event.getY());
-                    repaint();
-                    break;
-                case PD_BUTTON:
-                    dxField.setText(Integer.toString((int)event.getX()));
-                    dyField.setText(Integer.toString((int)event.getY()));
-                    curve.getPointD().setPoint((int)event.getX(), (int)event.getY());
-                    repaint();
-                    break;
+                temp.setX(event.getX());
+                temp.setY(event.getY());
+                repaint();
             }
         }
     }
@@ -154,44 +122,38 @@ public class Controller implements Initializable
     @FXML
     private void handleMousePressEvent(MouseEvent event)
     {
-        Point interest = new Point((int)event.getX(), (int)event.getY());
-
-        if(curve.getPointA().isInsideRadius(interest, Curve.POINT_RADIUS))
-            buttonMode = ActiveButtonMode.PA_BUTTON;
-        if(curve.getPointB().isInsideRadius(interest, Curve.POINT_RADIUS))
-            buttonMode = ActiveButtonMode.PB_BUTTON;
-        if(curve.getPointC().isInsideRadius(interest, Curve.POINT_RADIUS))
-            buttonMode = ActiveButtonMode.PC_BUTTON;
-        if(curve.getPointD().isInsideRadius(interest, Curve.POINT_RADIUS))
-            buttonMode = ActiveButtonMode.PD_BUTTON;
+        if(MouseButton.PRIMARY == event.getButton())
+        {
+            for(Point e : curve.getPointList())
+            {
+                if(e.isInsideRadius(new Point(event.getX(), event.getY()),curve.POINT_RADIUS))
+                {
+                    temp = e;
+                    clickMode = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            curve.getPointList().removeIf(
+                    p -> (p.isInsideRadius(new Point(event.getX(), event.getY()), curve.POINT_RADIUS))
+            );
+        }
     }
 
     @FXML
     private void handleMouseReleaseEvent(MouseEvent event)
     {
-        switch(buttonMode)
+        if(MouseButton.PRIMARY == event.getButton())
         {
-            case NONE:
-                break;
-            case PA_BUTTON:
-                axField.setText(Integer.toString((int)event.getX()));
-                ayField.setText(Integer.toString((int)event.getY()));
-                break;
-            case PB_BUTTON:
-                bxField.setText(Integer.toString((int)event.getX()));
-                byField.setText(Integer.toString((int)event.getY()));
-                break;
-            case PC_BUTTON:
-                cxField.setText(Integer.toString((int)event.getX()));
-                cyField.setText(Integer.toString((int)event.getY()));
-                break;
-            case PD_BUTTON:
-                dxField.setText(Integer.toString((int)event.getX()));
-                dyField.setText(Integer.toString((int)event.getY()));
-                break;
+            if(!clickMode)
+            {
+                curve.addPoint(new Point(event.getX(), event.getY()));
+            }
+            clickMode = false;
         }
-
-        buttonMode = ActiveButtonMode.NONE;
+        repaint();
     }
 
     @FXML
@@ -237,44 +199,6 @@ public class Controller implements Initializable
         repaint();
     }
 
-    @FXML
-    private void handlepaButtonClick()
-    {
-        buttonMode = ActiveButtonMode.PA_BUTTON;
-    }
-
-    @FXML
-    private void handlepbButtonClick()
-    {
-        buttonMode = ActiveButtonMode.PB_BUTTON;
-    }
-
-    @FXML
-    private void handlepcButtonClick()
-    {
-        buttonMode = ActiveButtonMode.PC_BUTTON;
-    }
-
-    @FXML
-    private void handlepdButtonClick()
-    {
-        buttonMode = ActiveButtonMode.PD_BUTTON;
-    }
-
-    private void setTextFieldAsNumericOnly(TextField textField)
-    {
-        textField.textProperty().addListener(new ChangeListener<String>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
-            {
-                if (!newValue.matches("\\d*"))
-                {
-                    textField.setText(newValue.replaceAll("[^\\d]", ""));
-                }
-            }
-        });
-    }
 
     private void clearCanvas()
     {
@@ -293,12 +217,6 @@ public class Controller implements Initializable
 
         clearCanvas();
 
-        Point pa = new Point(Integer.parseInt(axField.getText()), Integer.parseInt(ayField.getText()));
-        Point pb = new Point(Integer.parseInt(bxField.getText()), Integer.parseInt(byField.getText()));
-        Point pc = new Point(Integer.parseInt(cxField.getText()), Integer.parseInt(cyField.getText()));
-        Point pd = new Point(Integer.parseInt(dxField.getText()), Integer.parseInt(dyField.getText()));
-
-        curve.setPoints(pa, pb, pc, pd);
         curve.setMaxT(t);
         curve.draw(canvas.getGraphicsContext2D());
     }
@@ -328,5 +246,6 @@ public class Controller implements Initializable
     private void handleClearButtonClick()
     {
         clearCanvas();
+        curve.clearList();
     }
 }

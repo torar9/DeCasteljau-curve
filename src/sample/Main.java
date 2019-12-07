@@ -15,9 +15,8 @@ public class Main extends Application
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Bezierova křivka");
         primaryStage.setScene(new Scene(root, 300, 275, Color.WHITE));
-        Scene sc;
-        primaryStage.setWidth(829);
-        primaryStage.setHeight(760);
+        primaryStage.setWidth(820);
+        primaryStage.setHeight(830);
         primaryStage.show();
     }
 

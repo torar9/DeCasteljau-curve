@@ -2,9 +2,11 @@ package sample;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 public class Point
 {
+    private String text;
     private double x;
     private double y;
     private Color color;
@@ -26,21 +28,10 @@ public class Point
         setColor(color);
     }
 
-    public void drawCircle(int r, GraphicsContext gc)
-    {
-        double x1, y1;
-
-        for(double i = 0; i < 360; i += 2.0)
-        {
-            double angle = i;
-            x1 = r * Math.cos(Math.toRadians(angle));
-            y1 = r * Math.sin(Math.toRadians(angle));
-            BasicPainter.putPixel(x + x1, y + y1, color, gc);
-        }
-    }
-
     public void drawFullCircle(int r, GraphicsContext gc)
     {
+        gc.strokeText(text, x - 20, y - 10);
+
         for(int y = -r; y <= r; y++)
             for(int x = -r; x <= r; x++)
                 if(x * x + y * y <= r * r)
@@ -64,6 +55,16 @@ public class Point
     {
         setX(x);
         setY(y);
+    }
+
+    public void setText(String text)
+    {
+        this.text = text;
+    }
+
+    public String getText()
+    {
+        return text;
     }
 
     public Color getColor()
