@@ -29,7 +29,6 @@ public class BasicPainter
         if ((xz == xk) && (yz == yk))
         {
             putPixel(xz, yz, color, gc);
-
         }
         else
         {

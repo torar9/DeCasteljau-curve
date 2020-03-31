@@ -5,6 +5,7 @@ import javafx.scene.paint.Color;
 
 import java.math.BigDecimal;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 public class Curve
 {
@@ -57,7 +58,7 @@ public class Curve
     {
         setCurveColor(Color.BLACK);
         setMainTangentColor(Color.CRIMSON);
-        setBorderColor(Color.GRAY);
+        setBorderColor(Color.LIGHTGRAY);
     }
 
     private Point pointLeap(Point a, Point b, BigDecimal t)
@@ -101,11 +102,7 @@ public class Curve
 
         if(showTangents)
         {
-            for (Point p : tempPointList)
-            {
-                p.drawFullCircle(POINT_RADIUS, gc);
-            }
-
+            LinkedList<Point> tmpPoints = (LinkedList<Point>) tempPointList.clone();
             for(int i = pointList.size() - 2; i > 0; i--)
             {
                 Point tmp = tempPointList.removeFirst();
@@ -114,6 +111,17 @@ public class Curve
                     BasicPainter.drawLine(tmp, tempPointList.getFirst(), mainTangentColor, gc);
                     tmp = tempPointList.removeFirst();
                 }
+            }
+
+            ListIterator<Point> iter = tmpPoints.listIterator();
+            while(iter.hasNext())
+            {
+                Point p = iter.next();
+                if(!iter.hasNext())
+                {
+                    p.setColor(Color.BLACK.BLUE);
+                }
+                p.drawFullCircle(POINT_RADIUS, gc);
             }
         }
     }

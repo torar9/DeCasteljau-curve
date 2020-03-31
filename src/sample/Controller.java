@@ -193,12 +193,6 @@ public class Controller implements Initializable
         coordLabel.setText("x: " + event.getX() + " y: " + event.getY());
     }
 
-    @FXML
-    private void handleDrawButtonClick()
-    {
-        repaint();
-    }
-
 
     private void clearCanvas()
     {
